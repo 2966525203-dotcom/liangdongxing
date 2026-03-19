@@ -15,13 +15,13 @@ headers = {
     "Accept": "application/json, text/plain, */*",
     "Referer": "http://www.cwl.gov.cn/ygkj/wqkjgg/ssq/"
 }
-尝试:
+try:
     print("正在连接中彩网...")
     resp = requests.get(url, params=params, headers=headers, timeout=15)
     print(f"HTTP状态码: {resp.status_code}")
     
-    如果响应状态码 != 200
-        打印(f"请求失败:{响应状态码}")
+    if resp.status_code != 200:
+        print(f"请求失败: {resp.status_code}")
         exit(1)
         
     data = resp.json()
@@ -29,18 +29,18 @@ headers = {
     
     result = data["result"]
     # 转换为统一格式
-历史 =[]
-    对于项在结果：
-红色 =(映射(整数，项["红色"].拆分(",")))
-蓝色 =整数(项["蓝色"])
-历史.追加({
-            “问题”: 项目[“代码”,
-            “日期”: 项“日期”
-            "红色": 红色,
-            : 蓝色
+    history = []
+    for item in result:
+        red = list(map(int, item["red"].split(",")))
+        blue = int(item["blue"])
+        history.append({
+            "issue": item["code"],
+            "date": item["date"],
+            "red": red,
+            "blue": blue
         })
     # 按期号倒序（最新在前）
-历史。排序键=lambdax: x[“问题”
+    history.sort(key=lambda x: x["issue"], reverse=True)
     output = {
         "lastUpdated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "history": history
