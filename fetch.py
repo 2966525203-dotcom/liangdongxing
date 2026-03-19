@@ -1,84 +1,101 @@
 import requests
+from bs4 import BeautifulSoup
 import json
 from datetime import datetime
 import time
+import re
 
-def fetch_kaicai_data():
+def fetch_78500_data():
     """
-    从开彩API获取双色球历史数据
-    接口来源：http://www.opencai.net/apifree/
+    从 kaijiang.78500.cn 获取双色球历史数据
+    该网站数据与福彩中心官网同步更新
     """
-    print("正在连接开彩API...")
+    print("正在连接开奖网站 78500.cn...")
     
-    # 开彩API双色球接口
-    url = "http://www.opencai.net/apifree/"
-    
-    params = {
-        'caipiaoid': 'ssq',  # 双色球ID
-        'format': 'json',
-        'num': '100'  # 获取最近100期
-    }
-    
+    url = "https://kaijiang.78500.cn/ssq/"
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'application/json'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'zh-CN,zh;q=0.9',
+        'Referer': 'https://kaijiang.78500.cn/'
     }
     
     try:
-        # 添加延时，避免请求过快
-        time.sleep(2)
+        # 添加延时，模拟人类访问
+        time.sleep(3)
         
-        response = requests.get(url, params=params, headers=headers, timeout=15)
+        response = requests.get(url, headers=headers, timeout=20)
         print(f"HTTP状态码: {response.status_code}")
         
         if response.status_code != 200:
             print(f"请求失败: {response.status_code}")
             return None
             
-        data = response.json()
+        response.encoding = 'utf-8'
+        html = response.text
         
-        # 开彩API返回格式示例
-        # {
-        #   "data": [
-        #     {
-        #       "date": "2017-09-21",
-        #       "haoma": "02,08,11,15,19,28|09",
-        #       "qi": "2017111"
-        #     }
-        #   ]
-        # }
+        # 使用BeautifulSoup解析HTML
+        soup = BeautifulSoup(html, 'html.parser')
         
-        items = data.get('data', [])
-        print(f"获取到 {len(items)} 条数据")
-        
+        # 找到数据表格 - 根据您提供的截图，数据在一个表格中
+        # 方法1: 找到包含期号的表格行
         history = []
-        for item in items:
-            try:
-                issue = item.get('qi', '')
-                date = item.get('date', '')
-                haoma = item.get('haoma', '')
+        
+        # 查找所有表格行，通常数据在 <tr> 标签中
+        rows = soup.find_all('tr')
+        print(f"找到 {len(rows)} 行数据，开始解析...")
+        
+        for row in rows:
+            cells = row.find_all('td')
+            if len(cells) < 5:  # 至少需要期号、日期、号码等几列
+                continue
                 
-                # 解析开奖号码
-                if '|' in haoma:
-                    red_part, blue_part = haoma.split('|')
-                    reds = [int(x) for x in red_part.split(',') if x.strip().isdigit()]
-                    blue = int(blue_part) if blue_part.strip().isdigit() else 0
+            try:
+                # 提取期号（第一个td）
+                issue_text = cells[0].text.strip()
+                # 期号格式如 "2026029"
+                issue_match = re.search(r'(\d{6,7})', issue_text)
+                if not issue_match:
+                    continue
+                issue = issue_match.group(1)
+                
+                # 提取开奖时间（第二个td）
+                date_text = cells[1].text.strip()
+                # 日期格式如 "2026-03-17"
+                date_match = re.search(r'(\d{4}-\d{2}-\d{2})', date_text)
+                date = date_match.group(1) if date_match else ""
+                
+                # 提取开奖号码（第三个td）- 这是关键
+                # 号码格式在一个独立的td中，例如 "06 19 22 23 28 31 05"
+                number_cell = cells[2]
+                # 获取所有数字
+                numbers_text = number_cell.get_text(strip=True)
+                # 使用正则找到所有两位数以内的数字
+                all_numbers = re.findall(r'\b(\d{1,2})\b', numbers_text)
+                
+                if len(all_numbers) >= 7:
+                    # 前6个是红球，最后1个是蓝球
+                    red_balls = [int(x) for x in all_numbers[:6] if 1 <= int(x) <= 33]
+                    blue_ball = int(all_numbers[6]) if len(all_numbers) > 6 and 1 <= int(all_numbers[6]) <= 16 else 0
                     
-                    if len(reds) == 6 and 1 <= blue <= 16:
+                    if len(red_balls) == 6 and 1 <= blue_ball <= 16:
                         history.append({
                             "issue": issue,
                             "date": date,
-                            "red": sorted(reds),
-                            "blue": blue
+                            "red": sorted(red_balls),
+                            "blue": blue_ball
                         })
-                        print(f"解析成功: {issue} -> {reds} + {blue}")
+                        print(f"解析成功: {issue} -> {red_balls} + {blue_ball}")
                         
             except Exception as e:
-                print(f"解析出错: {e}")
+                # 静默跳过解析失败的行
                 continue
         
-        # 按期号倒序排序
-        history.sort(key=lambda x: x["issue"], reverse=True)
+        # 按期号倒序排序（最新在前）
+        history.sort(key=lambda x: int(x["issue"]), reverse=True)
+        
+        # 只保留最近100期
+        history = history[:100]
         
         print(f"\n✅ 成功解析 {len(history)} 期真实数据")
         return history
@@ -89,62 +106,39 @@ def fetch_kaicai_data():
         traceback.print_exc()
         return None
 
-def generate_fallback_data():
-    """生成备用数据（当API完全不可用时）"""
-    print("使用备用数据生成模式...")
-    from datetime import timedelta
-    import random
-    
-    history = []
-    base_issue = 26030
-    base_date = datetime.now()
-    
-    for i in range(100):
-        issue = str(base_issue - i)
-        date = (base_date - timedelta(days=i*3)).strftime("%Y-%m-%d")
-        reds = sorted(random.sample(range(1, 34), 6))
-        blue = random.randint(1, 16)
-        history.append({
-            "issue": issue,
-            "date": date,
-            "red": reds,
-            "blue": blue
-        })
-    
-    return history
-
 def main():
-    print("=" * 50)
-    print("双色球阳光开奖数据抓取工具 (开彩API)")
-    print("=" * 50)
+    print("=" * 60)
+    print("双色球阳光开奖数据自动抓取工具")
+    print("数据源: kaijiang.78500.cn")
+    print("与官网完全同步 - 基于您提供的网站")
+    print("=" * 60)
     
-    # 尝试抓取真实数据
-    history = fetch_kaicai_data()
+    # 抓取数据
+    history = fetch_78500_data()
     
-    # 如果抓取失败，使用备用数据
-    if not history or len(history) == 0:
-        print("⚠️ API抓取失败，使用备用数据...")
-        history = generate_fallback_data()
-        source = "fallback"
+    if history and len(history) > 0:
+        # 准备输出数据
+        output = {
+            "lastUpdated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "history": history,
+            "source": "78500.cn"
+        }
+        
+        # 保存到文件
+        with open("data.json", "w", encoding="utf-8") as f:
+            json.dump(output, f, ensure_ascii=False, indent=2)
+        
+        print(f"\n✅ 数据文件更新成功！共 {len(history)} 期")
+        print(f"📅 更新时间: {output['lastUpdated']}")
+        
+        # 显示最近3期验证
+        print("\n📊 最近3期数据验证:")
+        for i, item in enumerate(history[:3]):
+            print(f"  第{item['issue']}期 ({item['date']}): 红球{item['red']} + 蓝球{item['blue']}")
+            
     else:
-        source = "opencai.net"
-    
-    # 保存数据
-    output = {
-        "lastUpdated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "history": history,
-        "source": source
-    }
-    
-    with open("data.json", "w", encoding="utf-8") as f:
-        json.dump(output, f, ensure_ascii=False, indent=2)
-    
-    print(f"\n✅ 数据文件生成成功！共 {len(history)} 期")
-    print(f"📅 更新时间: {output['lastUpdated']}")
-    print(f"📊 数据来源: {source}")
-    if len(history) > 0:
-        print(f"📊 最新期号: {history[0]['issue']}")
-        print(f"  红球: {history[0]['red']} + 蓝球: {history[0]['blue']}")
+        print("\n❌ 数据抓取失败")
+        exit(1)
 
 if __name__ == "__main__":
     main()
