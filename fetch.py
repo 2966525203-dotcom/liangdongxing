@@ -8,7 +8,7 @@ import re
 def fetch_78500_data():
     """
     从 kaijiang.78500.cn 获取双色球历史数据
-    该网站数据与福彩中心官网同步更新
+    修复版本：直接定位号码所在的表格单元格
     """
     print("正在连接开奖网站 78500.cn...")
     
@@ -21,7 +21,7 @@ def fetch_78500_data():
     }
     
     try:
-        # 添加延时，模拟人类访问
+        # 添加延时
         time.sleep(3)
         
         response = requests.get(url, headers=headers, timeout=20)
@@ -34,70 +34,110 @@ def fetch_78500_data():
         response.encoding = 'utf-8'
         html = response.text
         
-        # 使用BeautifulSoup解析HTML
+        # 使用BeautifulSoup解析
         soup = BeautifulSoup(html, 'html.parser')
         
-        # 找到数据表格 - 根据您提供的截图，数据在一个表格中
-        # 方法1: 找到包含期号的表格行
         history = []
         
-        # 查找所有表格行，通常数据在 <tr> 标签中
+        # 方法1: 直接查找所有包含期号链接的行
+        # 在78500.cn上，期号通常在 <a> 标签内
         rows = soup.find_all('tr')
         print(f"找到 {len(rows)} 行数据，开始解析...")
         
         for row in rows:
-            cells = row.find_all('td')
-            if len(cells) < 5:  # 至少需要期号、日期、号码等几列
-                continue
-                
             try:
-                # 提取期号（第一个td）
-                issue_text = cells[0].text.strip()
-                # 期号格式如 "2026029"
+                # 获取行中所有单元格
+                cells = row.find_all('td')
+                if len(cells) < 3:
+                    continue
+                
+                # 提取期号 - 可能在第一个td中的a标签里
+                issue_cell = cells[0]
+                issue_link = issue_cell.find('a')
+                if issue_link:
+                    issue_text = issue_link.text.strip()
+                else:
+                    issue_text = issue_cell.text.strip()
+                
+                # 期号格式应为6位数字（如202629）或更多
                 issue_match = re.search(r'(\d{6,7})', issue_text)
                 if not issue_match:
                     continue
                 issue = issue_match.group(1)
                 
-                # 提取开奖时间（第二个td）
+                # 提取日期 - 第二个td
                 date_text = cells[1].text.strip()
-                # 日期格式如 "2026-03-17"
                 date_match = re.search(r'(\d{4}-\d{2}-\d{2})', date_text)
                 date = date_match.group(1) if date_match else ""
                 
-                # 提取开奖号码（第三个td）- 这是关键
-                # 号码格式在一个独立的td中，例如 "06 19 22 23 28 31 05"
+                # 提取开奖号码 - 关键修复点
+                # 号码在第三个td中，格式为 "06 19 22 23 28 31 05"
                 number_cell = cells[2]
-                # 获取所有数字
-                numbers_text = number_cell.get_text(strip=True)
-                # 使用正则找到所有两位数以内的数字
-                all_numbers = re.findall(r'\b(\d{1,2})\b', numbers_text)
+                
+                # 方法A: 查找所有球号元素（如果有span.ball之类的）
+                ball_spans = number_cell.find_all('span', class_=re.compile('ball'))
+                if ball_spans and len(ball_spans) >= 7:
+                    # 从span中提取数字
+                    numbers = []
+                    for span in ball_spans[:7]:  # 取前7个
+                        num_text = span.text.strip()
+                        if num_text.isdigit():
+                            numbers.append(int(num_text))
+                    
+                    if len(numbers) == 7:
+                        red_balls = numbers[:6]
+                        blue_ball = numbers[6]
+                        
+                        # 验证范围
+                        if all(1 <= r <= 33 for r in red_balls) and 1 <= blue_ball <= 16:
+                            history.append({
+                                "issue": issue,
+                                "date": date,
+                                "red": sorted(red_balls),
+                                "blue": blue_ball
+                            })
+                            print(f"解析成功 (方法A): {issue} -> {red_balls} + {blue_ball}")
+                            continue
+                
+                # 方法B: 直接提取整个单元格文本中的数字
+                cell_text = number_cell.get_text(strip=True)
+                # 查找所有两位数以内的数字
+                all_numbers = re.findall(r'(\d{1,2})', cell_text)
                 
                 if len(all_numbers) >= 7:
-                    # 前6个是红球，最后1个是蓝球
-                    red_balls = [int(x) for x in all_numbers[:6] if 1 <= int(x) <= 33]
-                    blue_ball = int(all_numbers[6]) if len(all_numbers) > 6 and 1 <= int(all_numbers[6]) <= 16 else 0
+                    # 取前7个数字
+                    numbers = [int(x) for x in all_numbers[:7]]
+                    red_balls = numbers[:6]
+                    blue_ball = numbers[6]
                     
-                    if len(red_balls) == 6 and 1 <= blue_ball <= 16:
+                    # 验证范围
+                    if all(1 <= r <= 33 for r in red_balls) and 1 <= blue_ball <= 16:
                         history.append({
                             "issue": issue,
                             "date": date,
                             "red": sorted(red_balls),
                             "blue": blue_ball
                         })
-                        print(f"解析成功: {issue} -> {red_balls} + {blue_ball}")
-                        
+                        print(f"解析成功 (方法B): {issue} -> {red_balls} + {blue_ball}")
+                
             except Exception as e:
-                # 静默跳过解析失败的行
+                # 跳过解析失败的行
                 continue
         
-        # 按期号倒序排序（最新在前）
+        # 按期号倒序排序
         history.sort(key=lambda x: int(x["issue"]), reverse=True)
         
         # 只保留最近100期
         history = history[:100]
         
         print(f"\n✅ 成功解析 {len(history)} 期真实数据")
+        
+        # 如果解析成功，显示前几期验证
+        if history:
+            print("\n📊 解析到的数据预览:")
+            for i, item in enumerate(history[:3]):
+                print(f"  {item['issue']} {item['date']}: {item['red']} + {item['blue']}")
+        
         return history
         
     except Exception as e:
@@ -108,9 +148,9 @@ def fetch_78500_data():
 
 def main():
     print("=" * 60)
-    print("双色球阳光开奖数据自动抓取工具")
+    print("双色球阳光开奖数据自动抓取工具 v2.0")
     print("数据源: kaijiang.78500.cn")
-    print("与官网完全同步 - 基于您提供的网站")
+    print("与官网完全同步 - 修复解析问题")
     print("=" * 60)
     
     # 抓取数据
@@ -131,13 +171,8 @@ def main():
         print(f"\n✅ 数据文件更新成功！共 {len(history)} 期")
         print(f"📅 更新时间: {output['lastUpdated']}")
         
-        # 显示最近3期验证
-        print("\n📊 最近3期数据验证:")
-        for i, item in enumerate(history[:3]):
-            print(f"  第{item['issue']}期 ({item['date']}): 红球{item['red']} + 蓝球{item['blue']}")
-            
     else:
-        print("\n❌ 数据抓取失败")
+        print("\n❌ 数据抓取失败，没有解析到任何期号")
         exit(1)
 
 if __name__ == "__main__":
