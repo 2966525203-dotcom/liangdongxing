@@ -148,10 +148,47 @@ def fetch_78500_data():
 
 def main():
     print("=" * 60)
-    print("双色球阳光开奖数据自动抓取工具 v2.0")
+    print("双色球阳光开奖数据自动抓取工具")
     print("数据源: kaijiang.78500.cn")
-    print("与官网完全同步 - 修复解析问题")
     print("=" * 60)
+    
+    history = fetch_78500_data()
+    
+    if history and len(history) > 0:
+        # 使用北京时间作为更新时间 - 每次都重新获取当前时间
+        beijing_now = get_beijing_time()
+        
+        # 尝试读取旧的data.json，看数据是否有变化
+        try:
+            with open("data.json", "r", encoding="utf-8") as f:
+                old_data = json.load(f)
+                old_history = old_data.get("history", [])
+                
+                # 如果数据完全相同，只更新时间
+                if old_history == history:
+                    print("📊 数据无变化，仅更新时间戳")
+        except:
+            pass  # 文件不存在或无法读取，继续正常保存
+        
+        output = {
+            "lastUpdated": beijing_now.strftime("%Y-%m-%d %H:%M:%S"),
+            "history": history,
+            "source": "78500.cn"
+        }
+        
+        with open("data.json", "w", encoding="utf-8") as f:
+            json.dump(output, f, ensure_ascii=False, indent=2)
+        
+        print(f"\n✅ 数据文件更新成功！共 {len(history)} 期")
+        print(f"📅 更新时间 (北京时间): {output['lastUpdated']}")
+        
+        print("\n📊 最近3期数据验证:")
+        for i, item in enumerate(history[:3]):
+            print(f"  第{item['issue']}期 ({item['date']}): 红球{item['red']} + 蓝球{item['blue']}")
+            
+    else:
+        print("\n❌ 数据抓取失败")
+        exit(1)
     
     # 抓取数据
     history = fetch_78500_data()
