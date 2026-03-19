@@ -2,11 +2,14 @@ name: Fetch Lottery Data
 
 on:
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '0 2 * * *'   # 每天UTC 2:00（北京时间10:00）运行
   workflow_dispatch:
 
 permissions:
-  contents: write  # 授予写入权限
+  contents: write
+
+env:
+  TZ: Asia/Shanghai  # 设置时区为北京时间
 
 jobs:
   build:
@@ -14,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}  # 使用token
+          token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Setup Python
         uses: actions/setup-python@v4
