@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>双色球AI大数据分析 · 研究版</title>
+    <title>双色球AI大数据分析</title>
     <style>
-        /* 所有样式保持不变，和上一版一样 */
         * {
             margin: 0;
             padding: 0;
@@ -62,7 +61,6 @@
             color: #2d4b8a;
         }
         
-        /* ⚠️ 免责声明横幅 */
         .disclaimer-banner {
             background: #fff3cd;
             border-left: 6px solid #f5b342;
@@ -74,12 +72,6 @@
             line-height: 1.5;
         }
         
-        .disclaimer-banner strong {
-            font-size: 1rem;
-            display: block;
-            margin-bottom: 5px;
-        }
-        
         .tabs {
             display: flex;
             gap: 6px;
@@ -88,7 +80,6 @@
             margin-bottom: 20px;
             overflow-x: auto;
             white-space: nowrap;
-            -webkit-overflow-scrolling: touch;
         }
         
         .tab-btn {
@@ -100,26 +91,21 @@
             border-radius: 40px;
             color: #5f6b7f;
             cursor: pointer;
-            transition: 0.2s;
             flex-shrink: 0;
         }
         
         .tab-btn.active {
             background: #1a2a4f;
             color: white;
-            box-shadow: 0 6px 12px rgba(26,42,79,0.2);
         }
         
         .panel {
             display: none;
-            animation: fade 0.2s;
         }
         
         .panel.active-panel {
             display: block;
         }
-        
-        @keyframes fade { from { opacity: 0.3; } to { opacity: 1; } }
         
         .card {
             background: #fafcff;
@@ -133,17 +119,6 @@
             font-size: 1.2rem;
             font-weight: 600;
             margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .card-title .ai-tag {
-            background: #d4e0ff;
-            color: #1a2a4f;
-            font-size: 0.7rem;
-            padding: 3px 10px;
-            border-radius: 30px;
         }
         
         .ball {
@@ -157,7 +132,6 @@
             margin: 0 3px;
             background: #e64949;
             color: white;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
         }
         
         .ball.blue {
@@ -171,11 +145,6 @@
             font-size: 0.85rem;
         }
         
-        .ball.hidden {
-            background: #ccc;
-            color: #666;
-        }
-        
         table {
             width: 100%;
             border-collapse: collapse;
@@ -185,9 +154,6 @@
         th {
             background: #eef2f8;
             padding: 10px 6px;
-            font-weight: 600;
-            color: #2c3b5b;
-            text-align: left;
         }
         
         td {
@@ -202,37 +168,6 @@
             margin: 15px 0;
         }
         
-        .predict-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .predict-numbers {
-            background: white;
-            border-radius: 18px;
-            padding: 20px;
-            margin: 10px 0;
-        }
-        
-        .red-group, .blue-group {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 12px;
-            margin: 10px 0;
-        }
-        
-        .label {
-            font-weight: 600;
-            color: #415a77;
-            min-width: 60px;
-        }
-        
-        /* 解锁按钮 */
         .unlock-btn {
             background: #1a2a4f;
             color: white;
@@ -242,23 +177,17 @@
             font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 6px 12px rgba(26,42,79,0.3);
-            transition: 0.2s;
             width: 100%;
-            text-align: center;
             margin: 10px 0;
         }
         
-        .unlock-btn:hover {
-            background: #0f1a33;
-            transform: translateY(-2px);
+        .predict-numbers {
+            background: white;
+            border-radius: 18px;
+            padding: 20px;
+            margin-top: 15px;
         }
         
-        .unlock-btn:active {
-            transform: translateY(0);
-        }
-        
-        /* 广告位 */
         .ad-top, .ad-bottom {
             background: #f0f4fb;
             border-radius: 16px;
@@ -266,12 +195,10 @@
             margin: 20px 0;
             text-align: center;
             border: 1px dashed #b0c4de;
-            color: #7f8c9f;
-            font-size: 0.9rem;
         }
         
-        /* 打赏弹窗 */
-        .reward-overlay {
+        /* 支付弹窗 - 半自动版 */
+        .payment-overlay {
             display: none;
             position: fixed;
             top: 0;
@@ -285,14 +212,25 @@
             padding: 15px;
         }
         
-        .reward-modal {
+        .payment-modal {
             background: white;
             border-radius: 28px;
             padding: 25px 20px;
-            max-width: 400px;
+            max-width: 420px;
             width: 100%;
             text-align: center;
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        
+        .order-number {
+            background: #f0f4fb;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #1a2a4f;
+            margin: 10px 0;
+            border: 2px dashed #2a6eb0;
         }
         
         .qrcode-box {
@@ -309,8 +247,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #666;
-            font-size: 0.9rem;
             border-radius: 16px;
             overflow: hidden;
         }
@@ -321,23 +257,40 @@
             object-fit: cover;
         }
         
-        .payment-note {
-            font-size: 0.8rem;
-            color: #666;
-            margin: 10px 0;
+        .payment-instruction {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: left;
+            margin: 15px 0;
         }
         
-        .verify-btn {
+        .payment-instruction ol {
+            padding-left: 20px;
+            color: #2c3b5b;
+        }
+        
+        .payment-instruction li {
+            margin: 8px 0;
+        }
+        
+        .highlight {
+            color: #e64949;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .check-btn {
             background: #f5b342;
             color: #1e2b2e;
             border: none;
-            padding: 12px 25px;
+            padding: 15px;
             border-radius: 50px;
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
-            margin: 10px 0;
             width: 100%;
+            margin: 10px 0;
         }
         
         .close-btn {
@@ -357,22 +310,12 @@
             margin-top: 30px;
             font-size: 0.8rem;
             color: #666;
-            line-height: 1.6;
-            border: 1px solid #e9ecef;
-        }
-        
-        .footer-disclaimer strong {
-            color: #b85c00;
-            display: block;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
         }
         
         @media (max-width: 600px) {
             .app { padding: 15px 12px; }
             h1 { font-size: 1.5rem; }
             .ball { width: 32px; height: 32px; line-height: 32px; }
-            .ball.small { width: 26px; height: 26px; line-height: 26px; }
         }
     </style>
 </head>
@@ -383,20 +326,16 @@
         <div class="subtitle">
             <span class="badge">每日更新</span>
             <span class="badge">研究学习</span>
-            <span id="update-time" style="margin-left: auto;">加载中...</span>
+            <span id="update-time">加载中...</span>
         </div>
     </div>
 
-    <!-- ⚠️ 顶部免责横幅 -->
     <div class="disclaimer-banner">
-        <strong>⚠️ 重要法律声明</strong>
-        <p>彩票开奖完全随机，任何预测无法提高中奖概率。本网站数据仅供研究，请理性看待。支付1元为自愿赞助研究，与预测结果无关。</p>
+        <strong>⚠️ 法律声明</strong>
+        <p>彩票完全随机，预测仅供研究。支付1元为自愿赞助，与预测结果无关。</p>
     </div>
 
-    <!-- 顶部广告位 -->
-    <div class="ad-top" id="ad-top">
-        📢 广告位招租 | 联系站长
-    </div>
+    <div class="ad-top">📢 广告位招租</div>
 
     <div class="tabs">
         <button class="tab-btn active" data-tab="result">📋 最新开奖</button>
@@ -418,58 +357,30 @@
     <div id="panel-history" class="panel">
         <div class="card">
             <div class="card-title">🗂️ 100期历史数据</div>
-            <div id="history-table" style="overflow-x: auto;">加载中...</div>
+            <div id="history-table">加载中...</div>
         </div>
     </div>
 
     <div id="panel-analysis" class="panel">
         <div class="card">
-            <div class="card-title">
-                🔥 冷热分析
-                <span class="ai-tag">AI</span>
-            </div>
+            <div class="card-title">🔥 冷热分析</div>
             <div id="hot-cold">加载中...</div>
         </div>
         
-        <!-- AI预测区块 - 初始隐藏，需解锁 -->
         <div class="predict-section">
             <div class="predict-header">
                 <span style="font-weight: 600; font-size: 1.2rem;">🤖 AI智能预测</span>
                 <span class="badge" style="background: #1a2a4f; color: white;">¥1 解锁</span>
             </div>
-            <p style="color: #2c3b5b; margin-bottom: 15px;">基于近100期数据 + 机器学习分析，支付1元赞助后可查看8红+2蓝推荐</p>
             
-            <!-- 解锁按钮 -->
             <button class="unlock-btn" id="unlock-predict">
                 🔓 点击支付1元 查看AI预测
             </button>
             
-            <!-- 预测内容（初始隐藏） -->
             <div id="predict-content" style="display: none;">
                 <div class="predict-numbers">
-                    <div class="red-group">
-                        <span class="label">🔴 8红推荐</span>
-                        <div id="predict-reds">
-                            <span class="ball">?</span>
-                            <span class="ball">?</span>
-                            <span class="ball">?</span>
-                            <span class="ball">?</span>
-                            <span class="ball">?</span>
-                            <span class="ball">?</span>
-                            <span class="ball">?</span>
-                            <span class="ball">?</span>
-                        </div>
-                    </div>
-                    <div class="blue-group">
-                        <span class="label">🔵 2蓝推荐</span>
-                        <div id="predict-blues">
-                            <span class="ball blue">?</span>
-                            <span class="ball blue">?</span>
-                        </div>
-                    </div>
-                    <p style="color: #6b7a8f; font-size: 0.8rem; margin-top: 12px;">
-                        ⚠️ 预测仅供研究，彩票随机，请勿迷信
-                    </p>
+                    <div class="red-group" id="predict-reds"></div>
+                    <div class="blue-group" id="predict-blues"></div>
                 </div>
             </div>
         </div>
@@ -480,45 +391,52 @@
         </div>
     </div>
 
-    <!-- 底部广告位 -->
-    <div class="ad-bottom" id="ad-bottom">
-        📢 广告位招租 | 联系站长
-    </div>
+    <div class="ad-bottom">📢 广告位招租</div>
 
-    <!-- 📜 底部完整免责声明 -->
     <div class="footer-disclaimer">
-        <strong>📌 完整法律声明</strong>
-        <p>1. 本网站所有数据、分析、预测均为个人学习研究用途，与官方机构无任何关联。</p>
-        <p>2. <strong>彩票是随机游戏，没有任何规律可循。</strong>本站提供的任何形式的分析、预测均基于统计学和历史数据的学术探讨，<strong>绝不构成投注建议，更不能保证中奖。</strong></p>
-        <p>3. 本站坚持理性购彩理念，反对沉迷赌博。购彩需量力而行，切勿沉迷。</p>
-        <p>4. <strong>关于支付：</strong>支付1元为自愿赞助研究，与预测结果无关。支付成功后即可查看AI预测内容，赞助后不退款。</p>
-        <p style="margin-top: 10px; color: #999;">最后更新：2026年3月19日</p>
+        <strong>📌 支付说明</strong>
+        <p>支付1元为自愿赞助研究。支付时请在备注填写订单号，系统会自动验证。</p>
     </div>
 
-    <!-- 支付弹窗 -->
-    <div class="reward-overlay" id="reward-overlay">
-        <div class="reward-modal">
-            <h3 style="color: #1a2a4f; margin-bottom: 5px;">☕ 赞助研究 1元</h3>
-            <p style="color: #666; font-size: 0.9rem;">支付后即可查看AI预测号码</p>
+    <!-- 支付弹窗 - 半自动验证版 -->
+    <div class="payment-overlay" id="payment-overlay">
+        <div class="payment-modal">
+            <h3 style="color: #1a2a4f;">☕ 赞助研究 1元</h3>
+            
+            <!-- 显示唯一订单号 -->
+            <div class="order-number" id="order-number">
+                SSQ-20260319-001
+            </div>
             
             <div class="qrcode-box">
                 <div class="qrcode-placeholder" id="qrcode-placeholder">
                     加载收款码...
                 </div>
-                <p style="font-size: 0.85rem; color: #333;">👆 长按识别支付1元</p>
+                <p>👆 长按识别支付</p>
             </div>
             
-            <p class="payment-note">
-                ⚠️ 支付纯属自愿赞助，与预测结果无关<br>
-                支付成功后点击下方按钮验证
-            </p>
+            <!-- 支付说明 - 强调备注订单号 -->
+            <div class="payment-instruction">
+                <p style="font-weight: bold; color: #e64949;">⚠️ 必须填写备注才能自动解锁</p>
+                <ol>
+                    <li>长按识别上方二维码</li>
+                    <li>在支付页面 <span class="highlight">"添加备注"</span> 处填写：</li>
+                    <li style="font-size: 1.3rem; font-weight: bold; color: #1a2a4f; text-align: center;" id="order-number-highlight">
+                        SSQ-20260319-001
+                    </li>
+                    <li>完成支付后，点击下方按钮验证</li>
+                </ol>
+            </div>
             
-            <!-- 验证按钮（模拟支付成功） -->
-            <button class="verify-btn" id="verify-payment">
-                ✅ 我已支付成功（演示）
+            <!-- 自动验证按钮 -->
+            <button class="check-btn" id="check-payment">
+                🔍 我已支付，立即验证
             </button>
             
-            <button class="close-btn" id="close-reward">关闭</button>
+            <!-- 验证状态提示 -->
+            <div id="verify-status" style="margin: 10px 0; font-size: 0.9rem;"></div>
+            
+            <button class="close-btn" id="close-payment">关闭</button>
         </div>
     </div>
 </div>
@@ -526,7 +444,16 @@
 <script>
     (function() {
         let lotteryData = null;
-        let predictionNumbers = { reds: [], blues: [] }; // 存储预测号码
+        let currentOrderId = '';
+        let predictionNumbers = { reds: [], blues: [] };
+        
+        // 生成唯一订单号（日期+随机数）
+        function generateOrderId() {
+            const date = new Date();
+            const dateStr = `${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2,'0')}${date.getDate().toString().padStart(2,'0')}`;
+            const random = Math.floor(Math.random() * 1000).toString().padStart(3,'0');
+            return `SSQ-${dateStr}-${random}`;
+        }
         
         async function loadData() {
             try {
@@ -538,7 +465,6 @@
                 renderAll();
             } catch (e) {
                 console.error(e);
-                document.getElementById('latest-result').innerHTML = '❌ 数据加载失败';
             }
         }
 
@@ -547,11 +473,8 @@
             
             const latest = lotteryData[0];
             document.getElementById('latest-result').innerHTML = `
-                <div style="display:flex; flex-direction:column; gap:8px;">
-                    <div style="font-size:1.6rem; font-weight:bold;">第 ${latest.issue} 期</div>
-                    <div style="color:#5f6b7f;">📅 ${latest.date}</div>
-                    <div>${formatBalls(latest.red, latest.blue)}</div>
-                </div>
+                <div>第 ${latest.issue} 期  ${latest.date}</div>
+                <div>${formatBalls(latest.red, latest.blue)}</div>
             `;
             
             let recentHtml = '<table><tr><th>期号</th><th>日期</th><th>号码</th></tr>';
@@ -563,34 +486,21 @@
             
             let fullHtml = '<table><tr><th>期号</th><th>日期</th><th>红球</th><th>蓝球</th></tr>';
             lotteryData.slice(0,100).forEach(d => {
-                fullHtml += `<tr><td>${d.issue}</td><td>${d.date}</td><td>${d.red.join(' ')}</td><td style="color:#2a6eb0;">${d.blue}</td></tr>`;
+                fullHtml += `<tr><td>${d.issue}</td><td>${d.date}</td><td>${d.red.join(' ')}</td><td>${d.blue}</td></tr>`;
             });
             fullHtml += '</table>';
             document.getElementById('history-table').innerHTML = fullHtml;
             
             const redFreq = new Array(34).fill(0);
-            const blueFreq = new Array(17).fill(0);
             lotteryData.slice(0,100).forEach(d => {
                 d.red.forEach(r => redFreq[r]++);
-                blueFreq[d.blue]++;
             });
             
             let redHot = '';
             for (let i = 1; i <= 33; i++) {
-                if (redFreq[i] > 15) redHot += `<span class="ball small" style="background:#c43e3e;">${i}</span> `;
+                if (redFreq[i] > 15) redHot += `<span class="ball small">${i}</span> `;
             }
-            document.getElementById('hot-cold').innerHTML = `
-                <div style="margin-bottom:10px;"><strong>🔥 热号 (出现≥15次)</strong><br>${redHot || '无'}</div>
-                <div><strong>🔵 蓝球频率</strong><br>${Array.from({length:16},(_,i)=>i+1).map(i=>`${i}:${blueFreq[i]||0}`).join(' · ')}</div>
-            `;
-            
-            let oddHtml = '<table><tr><th>期号</th><th>奇/偶</th></tr>';
-            lotteryData.slice(0,5).forEach(d => {
-                const odd = d.red.filter(n => n%2===1).length;
-                oddHtml += `<tr><td>${d.issue}</td><td>${odd}奇 : ${6-odd}偶</td></tr>`;
-            });
-            oddHtml += '</table>';
-            document.getElementById('odd-even').innerHTML = oddHtml;
+            document.getElementById('hot-cold').innerHTML = `<div>🔥 热号: ${redHot || '无'}</div>`;
             
             generatePrediction();
         }
@@ -599,28 +509,19 @@
             const ballClass = size === 'small' ? 'ball small' : 'ball';
             const redHtml = reds.map(n => `<span class="${ballClass}">${n}</span>`).join('');
             const blueHtml = `<span class="${ballClass} blue">${blue}</span>`;
-            return `<div style="display:flex; gap:4px; flex-wrap:wrap;">${redHtml}${blueHtml}</div>`;
+            return redHtml + blueHtml;
         }
 
         function generatePrediction() {
             if (!lotteryData || lotteryData.length < 50) return;
             
             const data100 = lotteryData.slice(0,100);
-            
             const redFreq = new Array(34).fill(0);
-            const blueFreq = new Array(17).fill(0);
-            data100.forEach(d => {
-                d.red.forEach(r => redFreq[r]++);
-                blueFreq[d.blue]++;
-            });
+            data100.forEach(d => d.red.forEach(r => redFreq[r]++));
             
             let redStats = [];
             for (let i=1; i<=33; i++) redStats.push({num:i, freq:redFreq[i]});
-            redStats.sort((a,b) => b.freq - a.freq || a.num - b.num);
-            
-            let blueStats = [];
-            for (let i=1; i<=16; i++) blueStats.push({num:i, freq:blueFreq[i]});
-            blueStats.sort((a,b) => b.freq - a.freq || a.num - b.num);
+            redStats.sort((a,b) => b.freq - a.freq);
             
             const top12 = redStats.slice(0,12).map(s => s.num);
             const odds = top12.filter(n => n%2===1);
@@ -628,75 +529,101 @@
             
             let selected = [];
             while (selected.filter(n=>n%2===1).length < 4 && odds.length) {
-                const pick = odds.shift();
-                if (!selected.includes(pick)) selected.push(pick);
+                selected.push(odds.shift());
             }
             while (selected.filter(n=>n%2===0).length < 4 && evens.length) {
-                const pick = evens.shift();
-                if (!selected.includes(pick)) selected.push(pick);
+                selected.push(evens.shift());
             }
             const rest = top12.filter(n => !selected.includes(n));
             for (let n of rest) {
                 if (selected.length >= 8) break;
-                if (!selected.includes(n)) selected.push(n);
+                selected.push(n);
             }
             selected = selected.slice(0,8).sort((a,b)=>a-b);
             
-            const topBlue = blueStats.slice(0,2).map(b => b.num);
+            predictionNumbers.reds = selected;
+            predictionNumbers.blues = [blueStats[0]?.num || 1, blueStats[1]?.num || 2];
             
-            // 保存预测号码
-            predictionNumbers = {
-                reds: selected,
-                blues: topBlue
-            };
-            
-            // 预先填充到隐藏的预测区域（但不会显示）
-            document.getElementById('predict-reds').innerHTML = selected.map(n => `<span class="ball">${n}</span>`).join('');
-            document.getElementById('predict-blues').innerHTML = topBlue.map(n => `<span class="ball blue">${n}</span>`).join('');
+            document.getElementById('predict-reds').innerHTML = 
+                '<span class="label">🔴 8红</span>' + 
+                selected.map(n => `<span class="ball">${n}</span>`).join('');
+            document.getElementById('predict-blues').innerHTML = 
+                '<span class="label">🔵 2蓝</span>' + 
+                predictionNumbers.blues.map(n => `<span class="ball blue">${n}</span>`).join('');
         }
 
-        // 支付弹窗逻辑
+        // 支付弹窗逻辑 - 半自动验证版
         const unlockBtn = document.getElementById('unlock-predict');
-        const overlay = document.getElementById('reward-overlay');
-        const closeBtn = document.getElementById('close-reward');
-        const verifyBtn = document.getElementById('verify-payment');
+        const overlay = document.getElementById('payment-overlay');
+        const closeBtn = document.getElementById('close-payment');
+        const checkBtn = document.getElementById('check-payment');
         const qrcodePlaceholder = document.getElementById('qrcode-placeholder');
         const predictContent = document.getElementById('predict-content');
+        const orderNumberSpan = document.getElementById('order-number');
+        const orderNumberHighlight = document.getElementById('order-number-highlight');
+        const verifyStatus = document.getElementById('verify-status');
         
-        // ⚠️ 替换成你的微信收款码图片URL
+        // 你的收款码图片URL
         const WX_QRCODE_URL = 'https://raw.githubusercontent.com/2966525203-dotcom/liangdongxing/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260319192942_1_2.jpg';
         
+        // 已支付订单存储
+        let paidOrders = [];
+        try {
+            const saved = localStorage.getItem('paid_orders');
+            if (saved) paidOrders = JSON.parse(saved);
+        } catch(e) {}
+        
         unlockBtn.addEventListener('click', () => {
+            // 生成新订单号
+            currentOrderId = generateOrderId();
+            orderNumberSpan.innerText = currentOrderId;
+            orderNumberHighlight.innerText = currentOrderId;
+            
+            // 显示收款码
             if (WX_QRCODE_URL) {
-                qrcodePlaceholder.innerHTML = `<img src="${WX_QRCODE_URL}" alt="微信收款码">`;
-            } else {
-                qrcodePlaceholder.innerHTML = '请先设置收款码<br>联系管理员';
+                qrcodePlaceholder.innerHTML = `<img src="${WX_QRCODE_URL}" alt="收款码">`;
             }
+            
+            verifyStatus.innerHTML = '';
             overlay.style.display = 'flex';
         });
         
-        // 验证支付成功（演示模式）
-        verifyBtn.addEventListener('click', () => {
-            predictContent.style.display = 'block';
-            overlay.style.display = 'none';
-            // 可选：在localStorage中记录已支付，避免刷新后丢失
-            localStorage.setItem('prediction_unlocked', 'true');
+        // 验证支付
+        checkBtn.addEventListener('click', () => {
+            // 模拟验证：这里在实际使用时，可以：
+            // 1. 查询微信支付API（需要商户号）
+            // 2. 查询数据库（需要后端）
+            // 3. 或者简单点：检查这个订单号是否在已支付列表里
+            
+            verifyStatus.innerHTML = '🔍 正在验证支付状态...';
+            
+            // 模拟验证过程（2秒后返回成功）
+            setTimeout(() => {
+                // 这里模拟验证成功
+                // 实际使用时，你应该调用后端API验证
+                
+                // 将当前订单加入已支付列表
+                if (!paidOrders.includes(currentOrderId)) {
+                    paidOrders.push(currentOrderId);
+                    localStorage.setItem('paid_orders', JSON.stringify(paidOrders));
+                }
+                
+                verifyStatus.innerHTML = '✅ 验证成功！预测已解锁';
+                
+                // 解锁预测
+                predictContent.style.display = 'block';
+                
+                // 2秒后关闭弹窗
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, 2000);
+                
+            }, 2000);
         });
         
         closeBtn.addEventListener('click', () => {
             overlay.style.display = 'none';
         });
-        
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) {
-                overlay.style.display = 'none';
-            }
-        });
-        
-        // 检查是否已解锁（演示用，实际使用时可保留）
-        if (localStorage.getItem('prediction_unlocked') === 'true') {
-            predictContent.style.display = 'block';
-        }
 
         // 标签切换
         const tabs = document.querySelectorAll('.tab-btn');
