@@ -1,0 +1,27 @@
+名称: 获取彩票数据
+
+启用:
+计划:
+    - cron: '0 2 * * *'   # 每天UTC 2:00（北京时间10:00）运行
+工作流调度:       # 允许手动触发
+
+作业:
+构建:
+运行于: ubuntu-latest
+步骤:
+      - uses: actions/checkout@v3
+      - name: 设置Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: 安装依赖
+        run: pip 安装 requests
+      - name: 获取最新的100个问题
+        run: python fetch.py
+      - name: 如果已更改则提交并推送
+运行: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'actions@github.com'
+          git add data.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "更新双色球数据"
+          git push
