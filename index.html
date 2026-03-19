@@ -188,6 +188,20 @@
             margin-top: 15px;
         }
         
+        .red-group, .blue-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+            margin: 10px 0;
+        }
+        
+        .label {
+            font-weight: 600;
+            color: #415a77;
+            min-width: 60px;
+        }
+        
         .ad-top, .ad-bottom {
             background: #f0f4fb;
             border-radius: 16px;
@@ -197,7 +211,6 @@
             border: 1px dashed #b0c4de;
         }
         
-        /* 支付弹窗 - 半自动版 */
         .payment-overlay {
             display: none;
             position: fixed;
@@ -403,7 +416,6 @@
         <div class="payment-modal">
             <h3 style="color: #1a2a4f;">☕ 赞助研究 1元</h3>
             
-            <!-- 显示唯一订单号 -->
             <div class="order-number" id="order-number">
                 SSQ-20260319-001
             </div>
@@ -415,7 +427,6 @@
                 <p>👆 长按识别支付</p>
             </div>
             
-            <!-- 支付说明 - 强调备注订单号 -->
             <div class="payment-instruction">
                 <p style="font-weight: bold; color: #e64949;">⚠️ 必须填写备注才能自动解锁</p>
                 <ol>
@@ -428,12 +439,10 @@
                 </ol>
             </div>
             
-            <!-- 自动验证按钮 -->
             <button class="check-btn" id="check-payment">
                 🔍 我已支付，立即验证
             </button>
             
-            <!-- 验证状态提示 -->
             <div id="verify-status" style="margin: 10px 0; font-size: 0.9rem;"></div>
             
             <button class="close-btn" id="close-payment">关闭</button>
@@ -447,7 +456,7 @@
         let currentOrderId = '';
         let predictionNumbers = { reds: [], blues: [] };
         
-        // 生成唯一订单号（日期+随机数）
+        // 生成唯一订单号
         function generateOrderId() {
             const date = new Date();
             const dateStr = `${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2,'0')}${date.getDate().toString().padStart(2,'0')}`;
@@ -465,6 +474,7 @@
                 renderAll();
             } catch (e) {
                 console.error(e);
+                document.getElementById('latest-result').innerHTML = '❌ 数据加载失败';
             }
         }
 
@@ -473,7 +483,7 @@
             
             const latest = lotteryData[0];
             document.getElementById('latest-result').innerHTML = `
-                <div>第 ${latest.issue} 期  ${latest.date}</div>
+                <div style="font-size:1.2rem; margin-bottom:8px;">第 ${latest.issue} 期  ${latest.date}</div>
                 <div>${formatBalls(latest.red, latest.blue)}</div>
             `;
             
@@ -486,11 +496,12 @@
             
             let fullHtml = '<table><tr><th>期号</th><th>日期</th><th>红球</th><th>蓝球</th></tr>';
             lotteryData.slice(0,100).forEach(d => {
-                fullHtml += `<tr><td>${d.issue}</td><td>${d.date}</td><td>${d.red.join(' ')}</td><td>${d.blue}</td></tr>`;
+                fullHtml += `<tr><td>${d.issue}</td><td>${d.date}</td><td>${d.red.join(' ')}</td><td style="color:#2a6eb0;">${d.blue}</td></tr>`;
             });
             fullHtml += '</table>';
             document.getElementById('history-table').innerHTML = fullHtml;
             
+            // 冷热分析
             const redFreq = new Array(34).fill(0);
             lotteryData.slice(0,100).forEach(d => {
                 d.red.forEach(r => redFreq[r]++);
@@ -500,7 +511,16 @@
             for (let i = 1; i <= 33; i++) {
                 if (redFreq[i] > 15) redHot += `<span class="ball small">${i}</span> `;
             }
-            document.getElementById('hot-cold').innerHTML = `<div>🔥 热号: ${redHot || '无'}</div>`;
+            document.getElementById('hot-cold').innerHTML = `<div>🔥 热号 (出现≥15次): ${redHot || '无'}</div>`;
+            
+            // 奇偶走势
+            let oddHtml = '<table><tr><th>期号</th><th>奇/偶</th></tr>';
+            lotteryData.slice(0,5).forEach(d => {
+                const odd = d.red.filter(n => n%2===1).length;
+                oddHtml += `<tr><td>${d.issue}</td><td>${odd}奇 : ${6-odd}偶</td></tr>`;
+            });
+            oddHtml += '</table>';
+            document.getElementById('odd-even').innerHTML = oddHtml;
             
             generatePrediction();
         }
@@ -516,43 +536,74 @@
             if (!lotteryData || lotteryData.length < 50) return;
             
             const data100 = lotteryData.slice(0,100);
-            const redFreq = new Array(34).fill(0);
-            data100.forEach(d => d.red.forEach(r => redFreq[r]++));
             
+            // 统计红球和蓝球频率
+            const redFreq = new Array(34).fill(0);
+            const blueFreq = new Array(17).fill(0);
+            
+            data100.forEach(d => {
+                d.red.forEach(r => redFreq[r]++);
+                blueFreq[d.blue]++;
+            });
+            
+            // 红球排序
             let redStats = [];
             for (let i=1; i<=33; i++) redStats.push({num:i, freq:redFreq[i]});
-            redStats.sort((a,b) => b.freq - a.freq);
+            redStats.sort((a,b) => b.freq - a.freq || a.num - b.num);
             
+            // 蓝球排序
+            let blueStats = [];
+            for (let i=1; i<=16; i++) blueStats.push({num:i, freq:blueFreq[i]});
+            blueStats.sort((a,b) => b.freq - a.freq || a.num - b.num);
+            
+            // 取前12热门红球
             const top12 = redStats.slice(0,12).map(s => s.num);
             const odds = top12.filter(n => n%2===1);
             const evens = top12.filter(n => n%2===0);
             
+            // 选择8个红球，尽量保持4奇4偶
             let selected = [];
             while (selected.filter(n=>n%2===1).length < 4 && odds.length) {
-                selected.push(odds.shift());
+                const pick = odds.shift();
+                if (!selected.includes(pick)) selected.push(pick);
             }
             while (selected.filter(n=>n%2===0).length < 4 && evens.length) {
-                selected.push(evens.shift());
+                const pick = evens.shift();
+                if (!selected.includes(pick)) selected.push(pick);
             }
             const rest = top12.filter(n => !selected.includes(n));
             for (let n of rest) {
                 if (selected.length >= 8) break;
-                selected.push(n);
+                if (!selected.includes(n)) selected.push(n);
             }
             selected = selected.slice(0,8).sort((a,b)=>a-b);
             
-            predictionNumbers.reds = selected;
-            predictionNumbers.blues = [blueStats[0]?.num || 1, blueStats[1]?.num || 2];
+            // 选择前2热门蓝球
+            const topBlue = blueStats.slice(0,2).map(b => b.num);
             
-            document.getElementById('predict-reds').innerHTML = 
-                '<span class="label">🔴 8红</span>' + 
-                selected.map(n => `<span class="ball">${n}</span>`).join('');
-            document.getElementById('predict-blues').innerHTML = 
-                '<span class="label">🔵 2蓝</span>' + 
-                predictionNumbers.blues.map(n => `<span class="ball blue">${n}</span>`).join('');
+            // 保存预测号码
+            predictionNumbers = {
+                reds: selected,
+                blues: topBlue
+            };
+            
+            // 更新主界面预测显示
+            const predictReds = document.getElementById('predict-reds');
+            const predictBlues = document.getElementById('predict-blues');
+            
+            if (predictReds) {
+                predictReds.innerHTML = '<span class="label">🔴 8红</span>' + 
+                    selected.map(n => `<span class="ball">${n}</span>`).join('');
+            }
+            if (predictBlues) {
+                predictBlues.innerHTML = '<span class="label">🔵 2蓝</span>' + 
+                    topBlue.map(n => `<span class="ball blue">${n}</span>`).join('');
+            }
+            
+            console.log('预测生成成功:', selected, topBlue);
         }
 
-        // 支付弹窗逻辑 - 半自动验证版
+        // 支付弹窗逻辑
         const unlockBtn = document.getElementById('unlock-predict');
         const overlay = document.getElementById('payment-overlay');
         const closeBtn = document.getElementById('close-payment');
@@ -563,7 +614,7 @@
         const orderNumberHighlight = document.getElementById('order-number-highlight');
         const verifyStatus = document.getElementById('verify-status');
         
-        // 你的收款码图片URL
+        // 你的收款码图片URL - ⚠️ 请替换成你的实际图片链接
         const WX_QRCODE_URL = 'https://raw.githubusercontent.com/2966525203-dotcom/liangdongxing/main/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20260319192942_1_2.jpg';
         
         // 已支付订单存储
@@ -582,6 +633,8 @@
             // 显示收款码
             if (WX_QRCODE_URL) {
                 qrcodePlaceholder.innerHTML = `<img src="${WX_QRCODE_URL}" alt="收款码">`;
+            } else {
+                qrcodePlaceholder.innerHTML = '请先设置收款码';
             }
             
             verifyStatus.innerHTML = '';
@@ -590,18 +643,10 @@
         
         // 验证支付
         checkBtn.addEventListener('click', () => {
-            // 模拟验证：这里在实际使用时，可以：
-            // 1. 查询微信支付API（需要商户号）
-            // 2. 查询数据库（需要后端）
-            // 3. 或者简单点：检查这个订单号是否在已支付列表里
-            
             verifyStatus.innerHTML = '🔍 正在验证支付状态...';
             
             // 模拟验证过程（2秒后返回成功）
             setTimeout(() => {
-                // 这里模拟验证成功
-                // 实际使用时，你应该调用后端API验证
-                
                 // 将当前订单加入已支付列表
                 if (!paidOrders.includes(currentOrderId)) {
                     paidOrders.push(currentOrderId);
@@ -610,8 +655,18 @@
                 
                 verifyStatus.innerHTML = '✅ 验证成功！预测已解锁';
                 
-                // 解锁预测
+                // 解锁预测 - 显示预测内容
                 predictContent.style.display = 'block';
+                
+                // 确保预测号码已经生成并显示
+                if (predictionNumbers.reds.length > 0) {
+                    document.getElementById('predict-reds').innerHTML = 
+                        '<span class="label">🔴 8红</span>' + 
+                        predictionNumbers.reds.map(n => `<span class="ball">${n}</span>`).join('');
+                    document.getElementById('predict-blues').innerHTML = 
+                        '<span class="label">🔵 2蓝</span>' + 
+                        predictionNumbers.blues.map(n => `<span class="ball blue">${n}</span>`).join('');
+                }
                 
                 // 2秒后关闭弹窗
                 setTimeout(() => {
