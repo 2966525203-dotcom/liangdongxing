@@ -1,0 +1,27 @@
+name: Fetch Lottery Data
+
+on:
+  schedule:
+    - cron: '0 2 * * *'   # 每天UTC 2:00（北京时间10:00）运行
+  workflow_dispatch:       # 允许手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: pip install requests
+      - name: Fetch latest 100 issues
+        run: python fetch.py
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'actions@github.com'
+          git add data.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "更新双色球数据"
+          git push

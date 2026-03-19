@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>双色球·冷热遗漏预测</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+        body { background: #f1f4f9; margin: 0; padding: 24px; display: flex; justify-content: center; }
+        .app { max-width: 1400px; width: 100%; background: white; border-radius: 40px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15); padding: 28px 32px; }
+        h1 { font-size: 2rem; font-weight: 600; margin: 0 0 6px; background: linear-gradient(135deg, #1e2b5e, #2d4b8a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .sub { color: #5f6c86; margin-bottom: 30px; border-left: 5px solid #f59e0b; padding-left: 18px; background: #fff7e6; border-radius: 0 20px 20px 0; line-height: 1.5; }
+        .tabs { display: flex; gap: 10px; border-bottom: 2px solid #e3e8f0; padding-bottom: 12px; margin-bottom: 28px; }
+        .tab-btn { background: none; border: none; font-size: 1.1rem; font-weight: 500; padding: 8px 24px; border-radius: 40px; color: #52607a; cursor: pointer; transition: 0.2s; }
+        .tab-btn.active { background: #1e2b5e; color: white; box-shadow: 0 8px 16px -6px #1e2b5e80; }
+        .panel { display: none; animation: fade 0.2s; }
+        .panel.active-panel { display: block; }
+        @keyframes fade { from { opacity: 0.2; } to { opacity: 1; } }
+        .card { background: #fafcff; border: 1px solid #eef2f6; border-radius: 28px; padding: 24px; margin-bottom: 28px; box-shadow: 0 6px 12px -8px rgba(0,20,40,0.08); }
+        .card-title { font-size: 1.4rem; font-weight: 600; margin-top: 0; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+        .card-title span { background: #dee6f5; color: #1e2b5e; font-size: 0.85rem; padding: 4px 12px; border-radius: 30px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { background: #eef2f6; padding: 12px 8px; font-weight: 600; color: #253553; }
+        td { padding: 10px 8px; border-bottom: 1px solid #dde3ec; }
+        .ball { display: inline-block; width: 34px; height: 34px; line-height: 34px; text-align: center; border-radius: 50%; font-weight: 600; margin: 0 3px; background: #e64949; color: white; box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
+        .ball.blue { background: #2a6eb0; }
+        .ball.small { width: 28px; height: 28px; line-height: 28px; font-size: 0.8rem; }
+        .flex-row { display: flex; flex-wrap: wrap; gap: 24px; }
+        .stat-box { background: white; border-radius: 20px; padding: 18px 22px; flex: 1 1 240px; border: 1px solid #e2eaf2; }
+        .hot-tag, .cold-tag { display: inline-block; padding: 2px 10px; border-radius: 30px; font-size: 0.75rem; margin-left: 6px; font-weight: 500; }
+        .hot-tag { background: #fee9e9; color: #b91c1c; }
+        .cold-tag { background: #e7edfe; color: #1e40af; }
+        .prediction-box { background: #e5ebf9; border-radius: 40px; padding: 28px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+        .red-group, .blue-group { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+        .predict-label { font-weight: 600; color: #1e2b5e; margin-right: 10px; }
+        .footer { margin-top: 40px; font-size: 0.8rem; color: #7d89a5; text-align: center; border-top: 1px dashed #cbd5e1; padding-top: 20px; }
+        .loading { text-align: center; padding: 50px; color: #6b7a98; }
+        .error { background: #ffebee; color: #b71c1c; padding: 20px; border-radius: 28px; }
+    </style>
+</head>
+<body>
+<div class="app">
+    <h1>🧠 双色球·冷热遗漏预测</h1>
+    <div class="sub">数据每日同步中彩网 · 最近100期 · 分析冷热/遗漏/奇偶 · 预测8红+2蓝</div>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="result">🏆 最新开奖</button>
+        <button class="tab-btn" data-tab="history">📚 历史列表</button>
+        <button class="tab-btn" data-tab="analysis">📊 冷热&遗漏&预测</button>
+    </div>
+
+    <!-- 面板1: 开奖结果 -->
+    <div id="panel-result" class="panel active-panel">
+        <div class="card">
+            <div class="card-title">📌 最近一期开奖</div>
+            <div id="latest-result" class="loading">加载中...</div>
+        </div>
+        <div class="card">
+            <div class="card-title">📅 近5期开奖</div>
+            <div id="recent-list" class="loading">加载中...</div>
+        </div>
+    </div>
+
+    <!-- 面板2: 历史开奖 -->
+    <div id="panel-history" class="panel">
+        <div class="card">
+            <div class="card-title">🗂️ 完整100期历史 <span>倒序排列</span></div>
+            <div id="history-table" style="overflow-x: auto;">加载中...</div>
+        </div>
+    </div>
+
+    <!-- 面板3: 分析预测 -->
+    <div id="panel-analysis" class="panel">
+        <div class="card">
+            <div class="card-title">🔥 红球冷热 & 遗漏</div>
+            <div id="red-stats" class="flex-row">计算中...</div>
+        </div>
+        <div class="card">
+            <div class="card-title">🔵 蓝球冷热 & 遗漏</div>
+            <div id="blue-stats">计算中...</div>
+        </div>
+        <div class="card">
+            <div class="card-title">⚖️ 奇偶比走势 (近10期)</div>
+            <div id="odd-even-table">计算中...</div>
+        </div>
+        <div class="card" style="background: #e2eafe;">
+            <div class="card-title">🎯 下期高概率推荐 <span>8红+2蓝</span></div>
+            <div id="prediction" class="prediction-box">生成中...</div>
+            <p style="font-size:0.85rem; margin:16px 0 0; color:#314d8c;">* 综合频率、遗漏、奇偶均衡得出</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        数据来源：中国福利彩票官网 · 最近更新：<span id="update-time">--</span><br>
+        本工具仅供自用研究，不构成购彩建议。
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ----- 状态 -----
+        let lotteryData = null;          // 历史数组
+        let lastUpdated = '';
+
+        // DOM 元素
+        const tabs = document.querySelectorAll('.tab-btn');
+        const panels = {
+            result: document.getElementById('panel-result'),
+            history: document.getElementById('panel-history'),
+            analysis: document.getElementById('panel-analysis')
+        };
+        const latestDiv = document.getElementById('latest-result');
+        const recentDiv = document.getElementById('recent-list');
+        const historyDiv = document.getElementById('history-table');
+        const redStatsDiv = document.getElementById('red-stats');
+        const blueStatsDiv = document.getElementById('blue-stats');
+        const oddEvenDiv = document.getElementById('odd-even-table');
+        const predictionDiv = document.getElementById('prediction');
+        const updateSpan = document.getElementById('update-time');
+
+        // 切换标签页
+        tabs.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = btn.dataset.tab;
+                tabs.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                Object.keys(panels).forEach(key => panels[key].classList.remove('active-panel'));
+                panels[target].classList.add('active-panel');
+            });
+        });
+
+        // 加载数据
+        async function loadData() {
+            try {
+                const resp = await fetch('data.json?t=' + Date.now());
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const json = await resp.json();
+                lotteryData = json.history || [];
+                lastUpdated = json.lastUpdated || '未知';
+                updateSpan.innerText = lastUpdated;
+                renderAll();
+            } catch (e) {
+                console.error(e);
+                latestDiv.innerHTML = `<div class="error">❌ 无法加载数据。请确认 data.json 存在。</div>`;
+                recentDiv.innerHTML = historyDiv.innerHTML = '';
+                updateSpan.innerText = '加载失败';
+            }
+        }
+
+        // 渲染所有视图
+        function renderAll() {
+            if (!lotteryData || lotteryData.length === 0) return;
+
+            // ----- 最新一期 -----
+            const latest = lotteryData[0];
+            latestDiv.innerHTML = `
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div style="font-size:1.8rem; font-weight:700;">第 ${latest.issue} 期</div>
+                    <div style="color:#4b6589;">📆 ${latest.date}</div>
+                    <div>${formatBalls(latest.red, latest.blue)}</div>
+                </div>
+            `;
+
+            // ----- 近5期 -----
+            let recentHtml = '<table><tr><th>期号</th><th>日期</th><th>号码</th></tr>';
+            lotteryData.slice(0,5).forEach(d => {
+                recentHtml += `<tr><td>${d.issue}</td><td>${d.date}</td><td>${formatBalls(d.red, d.blue, 'small')}</td></tr>`;
+            });
+            recentHtml += '</table>';
+            recentDiv.innerHTML = recentHtml;
+
+            // ----- 全部历史 -----
+            let fullHtml = '<table><tr><th>期号</th><th>日期</th><th>红球</th><th>蓝球</th></tr>';
+            lotteryData.forEach(d => {
+                fullHtml += `<tr><td>${d.issue}</td><td>${d.date}</td><td>${d.red.join(', ')}</td><td style="color:#1d4ed8;">${d.blue}</td></tr>`;
+            });
+            fullHtml += '</table>';
+            historyDiv.innerHTML = fullHtml;
+
+            // ----- 分析数据 (基于前100期) -----
+            const data100 = lotteryData.slice(0,100);
+            const redFreq = new Array(34).fill(0);     // 索引1-33
+            const blueFreq = new Array(17).fill(0);    // 索引1-16
+            const lastAppearRed = new Array(34).fill(0);   // 记录最后一次出现的期号索引 (最近一期为0)
+            const lastAppearBlue = new Array(17).fill(0);
+
+            data100.forEach((draw, idx) => {
+                draw.red.forEach(r => {
+                    redFreq[r]++;
+                    lastAppearRed[r] = idx;   // idx越小表示越近
+                });
+                let b = draw.blue;
+                blueFreq[b]++;
+                lastAppearBlue[b] = idx;
+            });
+
+            // 遗漏值 = 最近一期到该号码最后一次出现的距离（期数）
+            function computeMiss(lastIdx) {
+                return lastIdx === 0 ? 0 : (lastIdx); // 注意：如果从未出现？但100期内肯定出现次数至少为0，lastIdx为0表示最近一期出现，遗漏0
+            }
+
+            // 红球排序
+            let redList = [];
+            for (let i = 1; i <= 33; i++) {
+                redList.push({
+                    num: i,
+                    freq: redFreq[i],
+                    miss: lastAppearRed[i]  // 直接用索引差值
+                });
+            }
+            redList.sort((a, b) => b.freq - a.freq || a.num - b.num); // 按频率降序
+
+            // 蓝球排序
+            let blueList = [];
+            for (let i = 1; i <= 16; i++) {
+                blueList.push({
+                    num: i,
+                    freq: blueFreq[i],
+                    miss: lastAppearBlue[i]
+                });
+            }
+            blueList.sort((a, b) => b.freq - a.freq || a.num - b.num);
+
+            // 显示红球冷热 + 遗漏
+            let redHtml = `
+                <div class="stat-box">
+                    <h3 style="margin-top:0;">🔥 热号 (前8)</h3>
+                    ${redList.slice(0,8).map(r => `<span class="ball small" style="background:#c43e3e;">${r.num}</span> ${r.freq}次 <span class="hot-tag">遗漏${r.miss}期</span><br>`).join('')}
+                </div>
+                <div class="stat-box">
+                    <h3 style="margin-top:0;">❄️ 冷号 (后8)</h3>
+                    ${redList.slice(-8).map(r => `<span class="ball small" style="background:#3f6194;">${r.num}</span> ${r.freq}次 <span class="cold-tag">遗漏${r.miss}期</span><br>`).join('')}
+                </div>
+                <div class="stat-box">
+                    <h3 style="margin-top:0;">⏳ 大遗漏 (前5)</h3>
+                    ${redList.sort((a,b)=>b.miss - a.miss).slice(0,5).map(r => `${r.num} (${r.miss}期)`).join(' · ')}
+                </div>
+            `;
+            redStatsDiv.innerHTML = redHtml;
+
+            // 蓝球
+            let blueHtml = '<div class="flex-row">';
+            blueList.slice(0,8).forEach(b => {
+                blueHtml += `<div style="min-width:70px;"><span class="ball blue small">${b.num}</span> ${b.freq}次 <span class="cold-tag">遗漏${b.miss}期</span></div>`;
+            });
+            blueHtml += '</div><div style="margin-top:16px;">⏳ 遗漏较大蓝球：';
+            blueList.sort((a,b)=>b.miss - a.miss).slice(0,3).forEach(b => blueHtml += `${b.num}(${b.miss}期) `);
+            blueStatsDiv.innerHTML = blueHtml;
+
+            // 奇偶比 (最近10期)
+            let oddEvenHtml = '<table><tr><th>期号</th><th>红球</th><th>奇数</th><th>偶数</th></tr>';
+            data100.slice(0,10).forEach(d => {
+                const odd = d.red.filter(n => n%2===1).length;
+                const even = 6 - odd;
+                oddEvenHtml += `<tr><td>${d.issue}</td><td>${d.red.join(',')}</td><td>${odd}</td><td>${even}</td></tr>`;
+            });
+            oddEvenHtml += '</table>';
+            oddEvenDiv.innerHTML = oddEvenHtml;
+
+            // 预测：8红 + 2蓝
+            const predicted = predict(redList, blueList);
+            predictionDiv.innerHTML = `
+                <div class="red-group">
+                    <span class="predict-label">🔴 8红推荐</span>
+                    ${predicted.reds.map(n => `<span class="ball">${n}</span>`).join('')}
+                </div>
+                <div class="blue-group">
+                    <span class="predict-label">🔵 2蓝推荐</span>
+                    ${predicted.blues.map(n => `<span class="ball blue">${n}</span>`).join('')}
+                </div>
+                <div style="width:100%; margin-top:12px;">✨ 奇偶比例: 奇数${predicted.reds.filter(n=>n%2===1).length} : 偶数${predicted.reds.filter(n=>n%2===0).length}</div>
+            `;
+        }
+
+        // 格式化号码球
+        function formatBalls(reds, blue, size='normal') {
+            const ballClass = size === 'small' ? 'ball small' : 'ball';
+            const redHtml = reds.map(n => `<span class="${ballClass}">${n}</span>`).join('');
+            const blueHtml = `<span class="${ballClass} blue">${blue}</span>`;
+            return `<div style="display:flex; gap:4px; flex-wrap:wrap; align-items:center;">${redHtml}${blueHtml}</div>`;
+        }
+
+        // 预测函数 (基于频率+遗漏+奇偶均衡)
+        function predict(redStats, blueStats) {
+            // 红球：给每个号码评分 = 频率*2 + (40 - 遗漏)  (让热号且遗漏小的分高)
+            const scored = redStats.map(r => ({
+                num: r.num,
+                score: r.freq * 2 + (40 - r.miss)  // 遗漏越大，分越低
+            })).sort((a,b) => b.score - a.score);
+            
+            // 取前14个高分的作为候选池
+            const candidates = scored.slice(0, 14).map(s => s.num);
+            const odds = candidates.filter(n => n%2===1);
+            const evens = candidates.filter(n => n%2===0);
+            
+            let selected = [];
+            // 尽量选4奇4偶
+            while (selected.filter(n=>n%2===1).length < 4 && odds.length) {
+                const pick = odds.shift();
+                if (!selected.includes(pick)) selected.push(pick);
+            }
+            while (selected.filter(n=>n%2===0).length < 4 && evens.length) {
+                const pick = evens.shift();
+                if (!selected.includes(pick)) selected.push(pick);
+            }
+            // 如果还不够8个，从剩余候选中补 (无视奇偶)
+            const rest = candidates.filter(n => !selected.includes(n));
+            for (let n of rest) {
+                if (selected.length >= 8) break;
+                if (!selected.includes(n)) selected.push(n);
+            }
+            // 极少数情况仍不足，从全热号补
+            if (selected.length < 8) {
+                const allHot = redStats.map(r => r.num);
+                for (let n of allHot) {
+                    if (!selected.includes(n)) { selected.push(n); if (selected.length===8) break; }
+                }
+            }
+            selected = selected.slice(0,8).sort((a,b)=>a-b);
+
+            // 蓝球：取频率前2，若相同频率则选遗漏较小的
+            const topBlue = blueStats.slice(0,4).sort((a,b) => {
+                if (b.freq !== a.freq) return b.freq - a.freq;
+                else return a.miss - b.miss;  // 遗漏小的优先
+            }).slice(0,2).map(b => b.num);
+            
+            return { reds: selected, blues: topBlue };
+        }
+
+        loadData();
+    })();
+</script>
+</body>
+</html>
