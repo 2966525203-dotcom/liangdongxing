@@ -1,27 +1,39 @@
-name: Fetch Lottery Data
+import requests
+import json
+from datetime import datetime
 
-on:
-  schedule:
-    - cron: '0 2 * * *'   # 每天UTC 2:00（北京时间10:00）运行
-  workflow_dispatch:       # 允许手动触发
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-      - name: Install dependencies
-        run: pip install requests
-      - name: Fetch latest 100 issues
-        run: python fetch.py
-      - name: Commit and push if changed
-        run: |
-          git config --global user.name 'github-actions'
-          git config --global user.email 'actions@github.com'
-          git add data.json
-          git diff --quiet && git diff --staged --quiet || git commit -m "更新双色球数据"
-          git push
+url = "http://www.cwl.gov.cn/cwl_admin/front/cwlkj/search/kjxx/findDrawNotice"
+params = {
+    "name": "ssq",
+    "issueCount": "100"
+}
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+}
+try:
+    resp = requests.get(url, params=params, headers=headers, timeout=10)
+    data = resp.json()
+    result = data["result"]
+    # 转换为统一格式
+    history = []
+    for item in result:
+        red = list(map(int, item["red"].split(",")))
+        blue = int(item["blue"])
+        history.append({
+            "issue": item["code"],
+            "date": item["date"],
+            "red": red,
+            "blue": blue
+        })
+    # 按期号倒序（最新在前）
+    history.sort(key=lambda x: x["issue"], reverse=True)
+    output = {
+        "lastUpdated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "history": history
+    }
+    with open("data.json", "w", encoding="utf-8") as f:
+        json.dump(output, f, ensure_ascii=False, indent=2)
+    print("数据更新成功")
+except Exception as e:
+    print("抓取失败:", e)
+    exit(1)
