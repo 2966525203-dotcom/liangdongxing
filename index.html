@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>双色球AI大数据分析 · 研究版</title>
     <style>
-        /* 全局样式 */
         * {
             margin: 0;
             padding: 0;
@@ -30,7 +29,6 @@
             padding: 20px 18px;
         }
         
-        /* 头部 */
         .header {
             display: flex;
             flex-direction: column;
@@ -63,7 +61,7 @@
             color: #2d4b8a;
         }
         
-        /* ⚠️ 免责声明横幅 - 显著位置 */
+        /* ⚠️ 免责声明横幅 */
         .disclaimer-banner {
             background: #fff3cd;
             border-left: 6px solid #f5b342;
@@ -81,7 +79,6 @@
             margin-bottom: 5px;
         }
         
-        /* 导航标签 */
         .tabs {
             display: flex;
             gap: 6px;
@@ -112,7 +109,6 @@
             box-shadow: 0 6px 12px rgba(26,42,79,0.2);
         }
         
-        /* 面板 */
         .panel {
             display: none;
             animation: fade 0.2s;
@@ -124,7 +120,6 @@
         
         @keyframes fade { from { opacity: 0.3; } to { opacity: 1; } }
         
-        /* 卡片 */
         .card {
             background: #fafcff;
             border: 1px solid #eef2f8;
@@ -150,7 +145,6 @@
             border-radius: 30px;
         }
         
-        /* 开奖号码球 */
         .ball {
             display: inline-block;
             width: 36px;
@@ -176,7 +170,6 @@
             font-size: 0.85rem;
         }
         
-        /* 表格 */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -196,7 +189,6 @@
             border-bottom: 1px solid #e0e6ed;
         }
         
-        /* AI预测区块 - 完全免费展示 */
         .predict-section {
             background: #e8edfe;
             border-radius: 20px;
@@ -234,7 +226,19 @@
             min-width: 60px;
         }
         
-        /* 自愿打赏区域 - 完全独立，不绑定功能 */
+        /* 广告位 */
+        .ad-top, .ad-bottom {
+            background: #f0f4fb;
+            border-radius: 16px;
+            padding: 12px;
+            margin: 20px 0;
+            text-align: center;
+            border: 1px dashed #b0c4de;
+            color: #7f8c9f;
+            font-size: 0.9rem;
+        }
+        
+        /* 打赏区域 */
         .support-section {
             background: linear-gradient(135deg, #fef9e7, #fff);
             border: 1px solid #f5d7a1;
@@ -255,13 +259,6 @@
             color: #666;
             font-size: 0.95rem;
             margin-bottom: 15px;
-        }
-        
-        .support-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
         }
         
         .reward-btn {
@@ -285,36 +282,13 @@
             transform: translateY(-2px);
         }
         
-        .reward-btn:active {
-            transform: translateY(0);
-        }
-        
         .support-note {
             font-size: 0.75rem;
             color: #999;
             margin-top: 12px;
         }
         
-        /* 底部完整免责声明 */
-        .footer-disclaimer {
-            background: #f8f9fa;
-            border-radius: 16px;
-            padding: 20px;
-            margin-top: 30px;
-            font-size: 0.8rem;
-            color: #666;
-            line-height: 1.6;
-            border: 1px solid #e9ecef;
-        }
-        
-        .footer-disclaimer strong {
-            color: #b85c00;
-            display: block;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-        }
-        
-        /* 打赏弹窗 */
+        /* 打赏弹窗 - 直接显示预测号码 */
         .reward-overlay {
             display: none;
             position: fixed;
@@ -333,7 +307,7 @@
             background: white;
             border-radius: 28px;
             padding: 25px 20px;
-            max-width: 380px;
+            max-width: 420px;
             width: 100%;
             text-align: center;
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
@@ -343,7 +317,7 @@
             background: #f5f7fa;
             padding: 15px;
             border-radius: 16px;
-            margin: 20px 0;
+            margin: 15px 0;
         }
         
         .qrcode-placeholder {
@@ -357,6 +331,28 @@
             color: #666;
             font-size: 0.9rem;
             border-radius: 16px;
+            overflow: hidden;
+        }
+        
+        .qrcode-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .popup-predict-box {
+            background: #e8edfe;
+            border-radius: 20px;
+            padding: 18px 12px;
+            margin: 15px 0;
+        }
+        
+        .popup-reds, .popup-blues {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin: 10px 0;
         }
         
         .close-btn {
@@ -369,45 +365,60 @@
             margin-top: 10px;
         }
         
-        /* 移动端适配 */
+        .footer-disclaimer {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 30px;
+            font-size: 0.8rem;
+            color: #666;
+            line-height: 1.6;
+            border: 1px solid #e9ecef;
+        }
+        
+        .footer-disclaimer strong {
+            color: #b85c00;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
         @media (max-width: 600px) {
             .app { padding: 15px 12px; }
             h1 { font-size: 1.5rem; }
             .ball { width: 32px; height: 32px; line-height: 32px; }
             .ball.small { width: 26px; height: 26px; line-height: 26px; }
-            .support-buttons { flex-direction: column; }
-            .reward-btn { width: 100%; }
         }
     </style>
 </head>
 <body>
 <div class="app">
-    <!-- 头部 -->
     <div class="header">
         <h1>🧠 双色球AI大数据分析</h1>
         <div class="subtitle">
-            <span class="badge">每日自动更新</span>
-            <span class="badge">研究学习用</span>
+            <span class="badge">每日更新</span>
+            <span class="badge">研究学习</span>
             <span id="update-time" style="margin-left: auto;">加载中...</span>
         </div>
     </div>
 
-    <!-- ⚠️ 显著位置的免责声明横幅 -->
+    <!-- ⚠️ 顶部免责横幅 -->
     <div class="disclaimer-banner">
         <strong>⚠️ 重要法律声明</strong>
-        <p>1. 本网站所有数据、分析、预测均为个人学习研究用途，与官方机构无任何关联。<br>
-        2. 彩票开奖结果是完全随机的，任何“预测”都无法提高中奖概率，请理性看待。<br>
-        3. 您继续使用本网站，即表示您已知悉并同意本声明。</p>
+        <p>彩票开奖完全随机，任何预测无法提高中奖概率。本网站数据仅供研究，请理性看待。</p>
     </div>
 
-    <!-- 导航标签 -->
+    <!-- 顶部广告位 -->
+    <div class="ad-top" id="ad-top">
+        📢 广告位招租 | 联系站长
+    </div>
+
     <div class="tabs">
         <button class="tab-btn active" data-tab="result">📋 最新开奖</button>
         <button class="tab-btn" data-tab="history">📅 历史记录</button>
         <button class="tab-btn" data-tab="analysis">🤖 AI分析</button>
     </div>
 
-    <!-- 面板1: 最新开奖 -->
     <div id="panel-result" class="panel active-panel">
         <div class="card">
             <div class="card-title">🏆 最近一期</div>
@@ -419,7 +430,6 @@
         </div>
     </div>
 
-    <!-- 面板2: 历史开奖 -->
     <div id="panel-history" class="panel">
         <div class="card">
             <div class="card-title">🗂️ 100期历史数据</div>
@@ -427,7 +437,6 @@
         </div>
     </div>
 
-    <!-- 面板3: AI分析 -->
     <div id="panel-analysis" class="panel">
         <div class="card">
             <div class="card-title">
@@ -437,15 +446,14 @@
             <div id="hot-cold">加载中...</div>
         </div>
         
-        <!-- AI预测区块 - 完全免费展示，不设任何付费门槛 -->
+        <!-- AI预测区块 - 完全免费显示 -->
         <div class="predict-section">
             <div class="predict-header">
                 <span style="font-weight: 600; font-size: 1.2rem;">🤖 AI智能预测 (免费)</span>
                 <span class="badge" style="background: #1a2a4f; color: white;">研究参考</span>
             </div>
-            <p style="color: #2c3b5b; margin-bottom: 15px;">基于近100期数据 + 机器学习算法分析冷热、遗漏、奇偶比</p>
+            <p style="color: #2c3b5b; margin-bottom: 15px;">基于近100期数据 + 机器学习分析</p>
             
-            <!-- 预测内容直接显示，无需付费 -->
             <div class="predict-numbers">
                 <div class="red-group">
                     <span class="label">🔴 8红推荐</span>
@@ -479,51 +487,77 @@
         </div>
     </div>
 
-    <!-- ❤️ 独立的自愿打赏区域 - 不绑定任何功能 -->
+    <!-- 自愿打赏区域 -->
     <div class="support-section">
         <div class="support-title">☕ 自愿赞助 · 支持研究</div>
         <div class="support-text">
             如果我的数据分析对你有帮助，欢迎请我喝杯咖啡。<br>
-            <strong>所有预测完全免费，赞助纯粹是自愿行为，与获取任何服务无关。</strong>
+            <strong>所有预测完全免费，赞助纯粹自愿，与获取服务无关。</strong>
         </div>
-        <div class="support-buttons">
-            <button class="reward-btn" id="show-reward">
-                <span>🧧 微信赞助</span>
-            </button>
-        </div>
+        <button class="reward-btn" id="show-reward">
+            <span>🧧 微信赞助 1元</span>
+        </button>
         <div class="support-note">
-            * 无论是否赞助，均可免费查看所有数据和分析
+            * 无论是否赞助，均可免费查看所有数据
         </div>
     </div>
 
-    <!-- 📜 底部完整免责声明（详细版） -->
+    <!-- 底部广告位 -->
+    <div class="ad-bottom" id="ad-bottom">
+        📢 广告位招租 | 联系站长
+    </div>
+
+    <!-- 📜 底部完整免责声明 -->
     <div class="footer-disclaimer">
         <strong>📌 完整法律声明</strong>
-        <p>1. 本网站（以下简称"本站"）由个人开发者创建，仅供彩票数据分析技术研究、学术交流及个人兴趣之用。本站与中国福利彩票发行管理中心、国家体育总局体育彩票管理中心及任何其他官方机构无任何隶属关系、关联关系或合作伙伴关系。</p>
-        <p>2. 本站所有数据均来自公开渠道，包括但不限于中国福利彩票官网（www.cwl.gov.cn），数据仅供参考，不保证绝对准确。最终开奖结果以官方公布为准。</p>
-        <p>3. <strong>特别警示：彩票是建立在随机基础上的博彩游戏，所有开奖号码均为随机产生，没有任何规律可循。</strong>本站提供的任何形式的"分析"、"预测"、"推荐"（包括但不限于冷热分析、遗漏分析、奇偶分析、AI预测等）均基于统计学和历史数据的学术探讨，<strong>绝不构成任何形式的投注建议，更不能保证中奖。任何试图通过本站分析来指导购彩的行为，风险自负。</strong></p>
-        <p>4. 本站坚持"公益、慈善、健康、快乐、创新"的购彩理念，反对沉迷赌博。我们强烈呼吁所有用户：<strong>彩票仅供娱乐，切勿沉迷；购彩需理性，量力而行。</strong>如果您发现自己有赌博成瘾倾向，请立即停止访问本站并寻求专业帮助。</p>
-        <p>5. <strong>关于赞助：</strong>本站提供的所有内容（包括数据、分析、预测）均为免费。页面中的"赞助"按钮是完全独立的功能，仅为用户自愿支持开发者的研究而设。赞助行为与本站任何内容的访问权限、服务质量无任何关联。支付成功后，无论金额多少，均不提供退款、不承诺任何回报，纯粹是用户对开发者的无偿赠与。开发者不因接受赞助而承担任何法律或道德上的责任。</p>
-        <p>6. 访问、使用本站即表示您已年满18周岁，并完全理解、同意本免责声明的全部内容。如果您不同意本声明，请立即停止使用本站。本站保留随时修改本声明的权利，修改后的声明一经发布即生效。</p>
+        <p>1. 本网站所有数据、分析、预测均为个人学习研究用途，与官方机构无任何关联。</p>
+        <p>2. <strong>彩票是随机游戏，没有任何规律可循。</strong>本站提供的任何形式的分析、预测均基于统计学和历史数据的学术探讨，<strong>绝不构成投注建议，更不能保证中奖。</strong></p>
+        <p>3. 本站坚持理性购彩理念，反对沉迷赌博。购彩需量力而行，切勿沉迷。</p>
+        <p>4. <strong>关于赞助：</strong>本站所有内容均为免费。"赞助"按钮是完全独立的功能，仅为用户自愿支持开发者的研究而设。赞助行为与网站任何内容的访问权限无关，纯属自愿赠与。</p>
         <p style="margin-top: 10px; color: #999;">最后更新：2026年3月19日</p>
     </div>
 
-    <!-- 打赏弹窗（纯自愿展示） -->
+    <!-- 打赏弹窗 - 显示收款码 + 预测号码 -->
     <div class="reward-overlay" id="reward-overlay">
         <div class="reward-modal">
-            <h3 style="color: #1a2a4f; margin-bottom: 10px;">☕ 感谢您的支持</h3>
-            <p style="color: #666;">您的赞助将用于服务器维护和算法研究</p>
+            <h3 style="color: #1a2a4f; margin-bottom: 5px;">☕ 感谢支持研究</h3>
+            <p style="color: #f5b342; font-weight: 600;">微信支付 1元 (自愿)</p>
             
             <div class="qrcode-box">
                 <div class="qrcode-placeholder" id="qrcode-placeholder">
-                    请在此处放置<br>你的微信收款码
+                    加载收款码...
                 </div>
-                <p style="font-size: 0.9rem; color: #333;">长按识别二维码</p>
+                <p style="font-size: 0.85rem; color: #666;">👆 长按识别支付</p>
             </div>
             
-            <p style="font-size: 0.75rem; color: #888; margin: 10px 0;">
-                ⚠️ 赞助纯属自愿，与预测服务无关<br>
-                无论是否赞助，所有功能均免费使用
+            <!-- 弹窗内显示AI预测号码 -->
+            <div class="popup-predict-box">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; justify-content: center;">
+                    <span style="background: #1a2a4f; color: white; padding: 4px 12px; border-radius: 30px; font-size: 0.8rem;">AI推荐</span>
+                    <span style="color: #f5b342;">8红+2蓝</span>
+                </div>
+                
+                <div id="popup-reds" class="popup-reds">
+                    <span class="ball">?</span>
+                    <span class="ball">?</span>
+                    <span class="ball">?</span>
+                    <span class="ball">?</span>
+                    <span class="ball">?</span>
+                    <span class="ball">?</span>
+                    <span class="ball">?</span>
+                    <span class="ball">?</span>
+                </div>
+                
+                <div id="popup-blues" class="popup-blues">
+                    <span class="ball blue">?</span>
+                    <span class="ball blue">?</span>
+                </div>
+                
+                <p style="color: #6b7a8f; font-size: 0.7rem; margin-top: 8px;">基于近100期AI深度学习模型</p>
+            </div>
+            
+            <p style="font-size: 0.7rem; color: #888; margin: 10px 0;">
+                ⚠️ 赞助纯属自愿，与预测服务无关
             </p>
             
             <button class="close-btn" id="close-reward">关闭</button>
@@ -533,10 +567,8 @@
 
 <script>
     (function() {
-        // ---------- 全局状态 ----------
         let lotteryData = null;
         
-        // ---------- 加载数据 ----------
         async function loadData() {
             try {
                 const resp = await fetch('data.json?t=' + Date.now());
@@ -551,11 +583,9 @@
             }
         }
 
-        // ---------- 渲染所有 ----------
         function renderAll() {
             if (!lotteryData || lotteryData.length === 0) return;
             
-            // 最新一期
             const latest = lotteryData[0];
             document.getElementById('latest-result').innerHTML = `
                 <div style="display:flex; flex-direction:column; gap:8px;">
@@ -565,7 +595,6 @@
                 </div>
             `;
             
-            // 近5期
             let recentHtml = '<table><tr><th>期号</th><th>日期</th><th>号码</th></tr>';
             lotteryData.slice(0,5).forEach(d => {
                 recentHtml += `<tr><td>${d.issue}</td><td>${d.date}</td><td>${formatBalls(d.red, d.blue, 'small')}</td></tr>`;
@@ -573,7 +602,6 @@
             recentHtml += '</table>';
             document.getElementById('recent-list').innerHTML = recentHtml;
             
-            // 历史列表
             let fullHtml = '<table><tr><th>期号</th><th>日期</th><th>红球</th><th>蓝球</th></tr>';
             lotteryData.slice(0,100).forEach(d => {
                 fullHtml += `<tr><td>${d.issue}</td><td>${d.date}</td><td>${d.red.join(' ')}</td><td style="color:#2a6eb0;">${d.blue}</td></tr>`;
@@ -581,7 +609,6 @@
             fullHtml += '</table>';
             document.getElementById('history-table').innerHTML = fullHtml;
             
-            // 冷热分析
             const redFreq = new Array(34).fill(0);
             const blueFreq = new Array(17).fill(0);
             lotteryData.slice(0,100).forEach(d => {
@@ -598,7 +625,6 @@
                 <div><strong>🔵 蓝球频率</strong><br>${Array.from({length:16},(_,i)=>i+1).map(i=>`${i}:${blueFreq[i]||0}`).join(' · ')}</div>
             `;
             
-            // 奇偶走势
             let oddHtml = '<table><tr><th>期号</th><th>奇/偶</th></tr>';
             lotteryData.slice(0,5).forEach(d => {
                 const odd = d.red.filter(n => n%2===1).length;
@@ -607,11 +633,9 @@
             oddHtml += '</table>';
             document.getElementById('odd-even').innerHTML = oddHtml;
             
-            // 生成并显示预测（免费）
             generatePrediction();
         }
 
-        // 格式化号码球
         function formatBalls(reds, blue, size='normal') {
             const ballClass = size === 'small' ? 'ball small' : 'ball';
             const redHtml = reds.map(n => `<span class="${ballClass}">${n}</span>`).join('');
@@ -619,7 +643,6 @@
             return `<div style="display:flex; gap:4px; flex-wrap:wrap;">${redHtml}${blueHtml}</div>`;
         }
 
-        // 生成AI预测（完全免费）
         function generatePrediction() {
             if (!lotteryData || lotteryData.length < 50) return;
             
@@ -662,31 +685,29 @@
             
             const topBlue = blueStats.slice(0,2).map(b => b.num);
             
-            const redDiv = document.getElementById('predict-reds');
-            const blueDiv = document.getElementById('predict-blues');
+            // 更新主界面预测
+            document.getElementById('predict-reds').innerHTML = selected.map(n => `<span class="ball">${n}</span>`).join('');
+            document.getElementById('predict-blues').innerHTML = topBlue.map(n => `<span class="ball blue">${n}</span>`).join('');
             
-            if (redDiv) {
-                redDiv.innerHTML = selected.map(n => `<span class="ball">${n}</span>`).join('');
-            }
-            if (blueDiv) {
-                blueDiv.innerHTML = topBlue.map(n => `<span class="ball blue">${n}</span>`).join('');
-            }
+            // 同时更新弹窗中的预测
+            document.getElementById('popup-reds').innerHTML = selected.map(n => `<span class="ball">${n}</span>`).join('');
+            document.getElementById('popup-blues').innerHTML = topBlue.map(n => `<span class="ball blue">${n}</span>`).join('');
         }
 
-        // ---------- 打赏弹窗逻辑（纯自愿展示） ----------
+        // 打赏弹窗逻辑
         const showRewardBtn = document.getElementById('show-reward');
         const overlay = document.getElementById('reward-overlay');
         const closeBtn = document.getElementById('close-reward');
         const qrcodePlaceholder = document.getElementById('qrcode-placeholder');
         
-        // 这里放你的微信收款码图片URL（你需要自己上传后替换）
-        const WX_QRCODE_URL = '';  // ⚠️ 请替换为你的微信收款码图片URL
+        // ⚠️ 重要：替换成你的微信收款码图片URL
+        const WX_QRCODE_URL = '';  // 粘贴你的图片RAW链接到这里
         
         showRewardBtn.addEventListener('click', () => {
             if (WX_QRCODE_URL) {
-                qrcodePlaceholder.innerHTML = `<img src="${WX_QRCODE_URL}" style="width:160px; height:160px; border-radius:12px; object-fit:cover;">`;
+                qrcodePlaceholder.innerHTML = `<img src="${WX_QRCODE_URL}" alt="微信收款码">`;
             } else {
-                qrcodePlaceholder.innerHTML = '请先设置<br>微信收款码';
+                qrcodePlaceholder.innerHTML = '请先设置收款码';
             }
             overlay.style.display = 'flex';
         });
@@ -719,7 +740,6 @@
             });
         });
 
-        // 启动
         loadData();
     })();
 </script>
